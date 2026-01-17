@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using who_took_it_backend.Models;
 using who_took_it_backend.Services;
@@ -10,18 +11,25 @@ namespace who_took_it_backend.Controllers;
 [Route("api/embeddings")]
 public class EmbeddingController : ControllerBase
 {
+    private readonly EmbeddingService _embeddingService;
+
+    public EmbeddingController(EmbeddingService embeddingService)
+    {
+        _embeddingService = embeddingService;
+    }
+
     // GET /api/embeddings
     [HttpGet]
-    public ActionResult<List<Embedding>> GetAll()
+    public async Task<ActionResult<List<Embedding>>> GetAll()
     {
-        return Ok(EmbeddingService.GetAll());
+        return Ok(await _embeddingService.GetAllAsync());
     }
 
     // GET /api/embeddings/{id}
     [HttpGet("{id:guid}")]
-    public ActionResult<Embedding> GetById(Guid id)
+    public async Task<ActionResult<Embedding>> GetById(Guid id)
     {
-        var embedding = EmbeddingService.Get(id);
+        var embedding = await _embeddingService.GetAsync(id);
         if (embedding is null)
             return NotFound();
 
@@ -30,37 +38,36 @@ public class EmbeddingController : ControllerBase
 
     // POST /api/embeddings
     [HttpPost]
-    public ActionResult<Embedding> Create([FromBody] Embedding embedding)
+    public async Task<ActionResult<Embedding>> Create([FromBody] Embedding embedding)
     {
-        // Service will generate Id if empty
-        EmbeddingService.Add(embedding);
-        return CreatedAtAction(nameof(GetById), new { id = embedding.Id }, embedding);
+        var created = await _embeddingService.AddAsync(embedding);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     // PUT /api/embeddings/{id}
     [HttpPut("{id:guid}")]
-    public IActionResult Update(Guid id, [FromBody] Embedding embedding)
+    public async Task<IActionResult> Update(Guid id, [FromBody] Embedding embedding)
     {
-        var existing = EmbeddingService.Get(id);
+        var existing = await _embeddingService.GetAsync(id);
         if (existing is null)
             return NotFound();
 
         // Ensure path id is the source of truth
         embedding.Id = id;
 
-        EmbeddingService.Update(embedding);
+        await _embeddingService.UpdateAsync(id, embedding);
         return NoContent();
     }
 
     // DELETE /api/embeddings/{id}
     [HttpDelete("{id:guid}")]
-    public IActionResult Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        var existing = EmbeddingService.Get(id);
+        var existing = await _embeddingService.GetAsync(id);
         if (existing is null)
             return NotFound();
 
-        EmbeddingService.Delete(id);
+        await _embeddingService.DeleteAsync(id);
         return NoContent();
     }
 }

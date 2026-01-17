@@ -4,7 +4,7 @@ using who_took_it_backend.Models;
 
 namespace who_took_it_backend.Services;
 
-public static class PersonService
+public class PersonService
 {
     static List<Person> People { get; }
 

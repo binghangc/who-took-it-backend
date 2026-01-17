@@ -12,16 +12,10 @@ public class Embedding : BaseModel
     [Column("person_id")]
     public Guid PersonId { get; set; }
 
-    // easiest for jsonb: store as raw JSON string
     [Column("vector")]
-    public string VectorJson { get; set; } = "[]";
+    public string Vector { get; set; } = "[]";
 
     [Column("created_at")]
     public DateTimeOffset CreatedAt { get; set; }
 
-    [Column("model")]
-    public string? Model { get; set; }
-
-    [Column("source_image_key")]
-    public string? SourceImageKey { get; set; }
 }
