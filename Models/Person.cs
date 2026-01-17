@@ -1,12 +1,18 @@
+using Postgrest.Attributes;
+using Postgrest.Models;
 using System;
 using System.Collections.Generic;
 namespace who_took_it_backend.Models;
 
-public class Person
+[Table("Person")]
+public class Person : BaseModel
 {
+    [PrimaryKey("id", false)]
     public Guid Id { get; set; }
 
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    [Column("created_at")]
+    public DateTimeOffset CreatedAt { get; set; }
 
+    [Column("last_seen_at")]
     public DateTimeOffset? LastSeenAt { get; set; }
 }

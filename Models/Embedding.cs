@@ -1,16 +1,27 @@
+using Postgrest.Attributes;
+using Postgrest.Models;
+
 namespace who_took_it_backend.Models;
 
-public class Embedding
+[Table("Embedding")]
+public class Embedding : BaseModel
 {
-    // Primary key (uuid in Supabase)
+    [PrimaryKey("id", false)]
     public Guid Id { get; set; }
 
-    // Foreign key -> Person.Id (uuid in Supabase)
+    [Column("person_id")]
     public Guid PersonId { get; set; }
 
-    // Store the embedding as a JSON array in Supabase (jsonb).
-    // This binds nicely from/into JSON requests too.
-    public List<float> Vector { get; set; } = new();
+    // easiest for jsonb: store as raw JSON string
+    [Column("vector")]
+    public string VectorJson { get; set; } = "[]";
 
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    [Column("created_at")]
+    public DateTimeOffset CreatedAt { get; set; }
+
+    [Column("model")]
+    public string? Model { get; set; }
+
+    [Column("source_image_key")]
+    public string? SourceImageKey { get; set; }
 }
