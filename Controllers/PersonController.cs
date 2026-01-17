@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using who_took_it_backend.Models;
 using who_took_it_backend.Services;
@@ -8,18 +11,25 @@ namespace who_took_it_backend.Controllers;
 [Route("api/persons")]
 public class PersonController : ControllerBase
 {
+    private readonly PersonService _personService;
+
+    public PersonController(PersonService personService)
+    {
+        _personService = personService;
+    }
+
     // GET /api/persons
     [HttpGet]
-    public ActionResult<List<Person>> GetAll()
+    public async Task<ActionResult<List<Person>>> GetAll()
     {
-        return Ok(PersonService.GetAll());
+        return Ok(await _personService.GetAllAsync());
     }
 
     // GET /api/persons/{id}
     [HttpGet("{id:guid}")]
-    public ActionResult<Person> GetById(Guid id)
+    public async Task<ActionResult<Person>> GetById(Guid id)
     {
-        var person = PersonService.Get(id);
+        var person = await _personService.GetAsync(id);
         if (person is null)
             return NotFound();
 
@@ -28,37 +38,35 @@ public class PersonController : ControllerBase
 
     // POST /api/persons
     [HttpPost]
-    public ActionResult<Person> Create([FromBody] Person person)
+    public async Task<ActionResult<Person>> Create([FromBody] Person person)
     {
-        // Service will generate Id if empty
-        PersonService.Add(person);
-        return CreatedAtAction(nameof(GetById), new { id = person.Id }, person);
+        var created = await _personService.AddAsync(person);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     // PUT /api/persons/{id}
     [HttpPut("{id:guid}")]
-    public IActionResult Update(Guid id, [FromBody] Person person)
+    public async Task<IActionResult> Update(Guid id, [FromBody] Person person)
     {
-        var existing = PersonService.Get(id);
+        var existing = await _personService.GetAsync(id);
         if (existing is null)
             return NotFound();
 
-        // Ensure path id is the source of truth
         person.Id = id;
 
-        PersonService.Update(person);
+        await _personService.UpdateAsync(id, person);
         return NoContent();
     }
 
     // DELETE /api/persons/{id}
     [HttpDelete("{id:guid}")]
-    public IActionResult Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        var existing = PersonService.Get(id);
+        var existing = await _personService.GetAsync(id);
         if (existing is null)
             return NotFound();
 
-        PersonService.Delete(id);
+        await _personService.DeleteAsync(id);
         return NoContent();
     }
 }
