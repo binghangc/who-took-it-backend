@@ -1,42 +1,47 @@
+using System;
+using System.Collections.Generic;
 using who_took_it_backend.Models;
 
 namespace who_took_it_backend.Services;
 
-public static class ImageService
+public static class PersonService
 {
-    static List<Image> Images { get; }
-    static int nextId = 1;
+    static List<Person> People { get; }
 
-    static ImageService()
+    static PersonService()
     {
-        Images = new List<Image>();
+        People = new List<Person>();
     }
 
-    public static List<Image> GetAll() => Images;
+    public static List<Person> GetAll() => People;
 
-    public static Image? Get(int id) => Images.FirstOrDefault(i => i.Id == id);
+    public static Person? Get(Guid id) => People.FirstOrDefault(p => p.Id == id);
 
-    public static void Add(Image image)
+    public static void Add(Person person)
     {
-        image.Id = nextId++;
-        Images.Add(image);
+        if (person.Id == Guid.Empty)
+        {
+            person.Id = Guid.NewGuid();
+        }
+
+        People.Add(person);
     }
 
-    public static void Delete(int id)
+    public static void Delete(Guid id)
     {
-        var image = Get(id);
-        if (image is null)
+        var person = Get(id);
+        if (person is null)
             return;
 
-        Images.Remove(image);
+        People.Remove(person);
     }
 
-    public static void Update(Image image)
+    public static void Update(Person person)
     {
-        var index = Images.FindIndex(i => i.Id == image.Id);
+        var index = People.FindIndex(p => p.Id == person.Id);
         if (index == -1)
             return;
 
-        Images[index] = image;
+        People[index] = person;
     }
 }
